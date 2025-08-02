@@ -12,7 +12,7 @@ from datetime import datetime
 import os
 
 BASE_URL = "https://techversantinfotech.com/talent/"
-
+# Extracts job data from a single job section and returns it as a dictionary
 def extract_job_data(job_section):
     job_data = {}
 
@@ -106,6 +106,7 @@ def extract_job_data(job_section):
 
     return job_data
 
+# Checks if the soup object contains pagination elements
 def check_pagination(soup):
     # Look for common pagination patterns
     pagination_indicators = [
@@ -120,6 +121,7 @@ def check_pagination(soup):
     has_pagination = any(indicator for indicator in pagination_indicators)
     return has_pagination
 
+# Saves the list of job dictionaries to an Excel file with formatting and summary
 def save_jobs_to_excel(jobs_data, filename=None):
     if not jobs_data:
         raise ValueError("No job data provided to save")
@@ -175,6 +177,7 @@ def save_jobs_to_excel(jobs_data, filename=None):
         print(f"❌ Error saving to Excel: {str(e)}")
         raise
 
+# Formats the Excel worksheet for better readability (headers, borders, column widths)
 def format_excel_worksheet(worksheet, df):  
     # Define styles
     header_font = Font(bold=True, color='FFFFFF', size=12)
@@ -217,6 +220,7 @@ def format_excel_worksheet(worksheet, df):
     for row in range(2, len(df) + 2):
         worksheet.row_dimensions[row].height = 60
 
+# Creates a summary sheet in the Excel workbook with statistics and breakdowns
 def create_summary_sheet(workbook, df):
     
     summary_sheet = workbook.create_sheet(title='Summary')
@@ -276,6 +280,7 @@ def create_summary_sheet(workbook, df):
         adjusted_width = max(max_length + 2, 15)
         summary_sheet.column_dimensions[column_letter].width = adjusted_width
 
+# Validates the completeness of the scraped job data
 def validate_scraped_data(jobs_data):
     if not jobs_data:
         print("⚠️  No jobs found - this might indicate a problem")
@@ -298,6 +303,7 @@ def validate_scraped_data(jobs_data):
     
     return True
 
+# Main function to scrape jobs from the target website
 def scrape_jobs():
     
     try:
