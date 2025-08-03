@@ -37,12 +37,35 @@ def extract_job_data(job_section):
         job_data['PostingDate'] = posting_date_elem.get_text(strip=True) if posting_date_elem else ''
 
         # Job Description Summary
-        desc_section = job_section.find('strong', string='What\'s important to us:')
-        if desc_section:
-            desc_para = desc_section.parent.find_next_sibling('p')
-            job_data['JobDescriptionSummary'] = desc_para.get_text(strip=True) if desc_para else ''
-        else:
-            job_data['JobDescriptionSummary'] = ''
+        # desc_section = job_section.find('strong', string='What\'s important to us:')
+        # if desc_section:
+        #     desc_para = desc_section.parent.find_next_sibling('p')
+        #     job_data['JobDescriptionSummary'] = desc_para.get_text(strip=True) if desc_para else ''
+        # else:
+        #     job_data['JobDescriptionSummary'] = ''
+
+        # Job Description extraction using 'Job Description' heading
+        desc_heading = job_section.find('strong', string=lambda text: text and 'job description' in text.lower())
+        job_description = []
+
+        if desc_heading:
+            # Go up to the parent <p>, then find the next <ul> which contains responsibilities
+            ul_section = desc_heading.find_parent('p').find_next_sibling('ul')
+            
+            if ul_section:
+                lis = ul_section.find_all('li')
+                for li in lis:
+                    nested_ul = li.find_all('ul')
+                    if nested_ul:
+                        for sub_ul in nested_ul:
+                            for sub_li in sub_ul.find_all('li'):
+                                job_description.append(sub_li.get_text(strip=True))
+                    else:
+                        job_description.append(li.get_text(strip=True))
+
+        # Join description bullets into one string
+        job_data['JobDescriptionSummary'] = '\n'.join(job_description) if job_description else ''
+
 
         # Experience requirement extraction
         full_text = job_section.get_text()
@@ -129,7 +152,7 @@ def save_jobs_to_excel(jobs_data, filename=None):
     # Generate filename if not provided
     if filename is None:
         # timestamp = datetime.now().strftime('%d-%m-%Y-%I-%M-%S-%p')
-        filename = f"Techversant_Jobs.xlsx"
+        filename = f"Techversant_Jobs_New.xlsx"
     
     # Ensure .xlsx extension
     if not filename.endswith('.xlsx'):
